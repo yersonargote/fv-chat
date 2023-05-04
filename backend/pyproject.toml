@@ -1,0 +1,20 @@
+[tool.poetry]
+name = "backend"
+version = "0.1.0"
+description = ""
+authors = ["yerson <yersonargote@unicauca.edu.co>"]
+readme = "README.md"
+
+[tool.poetry.dependencies]
+python = "^3.10"
+fastapi = "^0.95.1"
+sqlalchemy = "^2.0.12"
+fastapi-sqlalchemy = "^0.2.1"
+psycopg2-binary = "^2.9.6"
+uvicorn = {extras = ["standard"], version = "^0.22.0"}
+python-dotenv = "^1.0.0"
+
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
