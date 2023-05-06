@@ -50,7 +50,7 @@ def get_db():
 
 
 # Mount the static files directory for serving client-side code
-app.mount("/static", StaticFiles(directory="static"), name="static")
+# app.mount("/static", StaticFiles(directory="static"), name="static")
 
 
 # Define a SQLAlchemy model for Chat messages
@@ -76,9 +76,9 @@ class ChatMessageResponse(BaseModel):
 
 
 # Define a route for serving the index HTML file
-@app.get("/", response_class=HTMLResponse)
-async def index():
-    return open("static/index.html").read()
+# @app.get("/", response_class=HTMLResponse)
+# async def index():
+#     return open("static/index.html").read()
 
 
 # Define a route for handling WebSocket connections
