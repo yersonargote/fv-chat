@@ -1,5 +1,3 @@
-# Chat
-
 # Backend
 
 ## Setup database
@@ -16,16 +14,18 @@ CREATE TABLE chat_messages (
 
 ## Run the server
 
+### Docker compose
+  
 ```bash
-uvicorn main:app --reload
+docker-compose up -d
 ```
 
-# Frontend
+### Run with poetry
 
-## Run the server
+- Install [poetry](https://python-poetry.org/docs/#installation)
 
 ```bash
-cd frontend
-pnpm run dev
-# npm run dev
+poetry install
+poetry shell
+uvicorn main:app --reload
 ```
