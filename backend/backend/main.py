@@ -52,6 +52,17 @@ def get_db():
 # Mount the static files directory for serving client-side code
 # app.mount("/static", StaticFiles(directory="static"), name="static")
 
+# Create the ChatMessage table when the app starts up
+# Base.metadata.create_all(bind=engine)
+
+# Global variable to store the WebSocket connection
+connected_websockets = set()
+
+
+async def broadcast(message):
+    for websocket in connected_websockets:
+        await websocket.send_json(message)
+
 
 # Define a SQLAlchemy model for Chat messages
 class ChatMessage(Base):
@@ -84,6 +95,7 @@ class ChatMessageResponse(BaseModel):
 # Define a route for handling WebSocket connections
 @app.websocket("/ws")
 async def websocket_endpoint(websocket: WebSocket):
+    connected_websockets.add(websocket)
     await websocket.accept()
     while True:
         try:
@@ -95,16 +107,17 @@ async def websocket_endpoint(websocket: WebSocket):
 
             # Create a new chat message in the database
             chat_message = ChatMessage(
-                username=message["username"], message=message["message"]
+                username=message["username"],
+                message=message["message"],
             )
             db = SessionLocal()
             db.add(chat_message)
             db.commit()
 
             # Send the new chat message to all connected clients
-            await websocket.send_json({"status": "ok", "message": message})
+            await broadcast({"status": "ok", "message": message})
         except WebSocketDisconnect:
-            break
+            connected_websockets.remove(websocket)
 
 
 # # Define a route for retrieving all chat messages
@@ -132,3 +145,15 @@ async def create_chat_message(
     db.commit()
     db.refresh(chat_message)
     return chat_message
+
+
+@app.on_event("startup")
+async def startup_event():
+    Base.metadata.create_all(bind=engine)
+
+
+@app.on_event("shutdown")
+async def shutdown_event():
+    Base.metadata.drop_all(bind=engine)
+    for websocket in connected_websockets:
+        await websocket.close()
