@@ -1,4 +1,3 @@
-<!-- App.vue -->
 <template>
   <div class="container">
     <h1>Real-Time Chat</h1>
@@ -25,54 +24,45 @@
         </div>
       </div>
     </div>
+
   </div>
 </template>
 
-<script lang="ts">
-import { ref, onMounted } from 'vue'
-import axios from 'axios'
-
+<script>
 export default {
-  setup() {
-    const username = ref('')
-    const message = ref('')
-    const messages = ref([])
-    let socket: WebSocket | null = null
-
-    const getMessages = async () => {
-      const response = await axios.get('/api/messages')
-      messages.value = response.data
-    }
-
-    const sendMessage = async () => {
-      if (socket) {
-        const messageObj = {
-          username: username.value,
-          message: message.value,
-        }
-        socket.send(JSON.stringify(messageObj))
-        message.value = ''
-      }
-    }
-
-    onMounted(() => {
-      socket = new WebSocket('ws://localhost:8000/ws')
-      socket.addEventListener('message', (event) => {
-        const message = JSON.parse(event.data)
-        messages.value.push(message)
-      })
-      getMessages()
-    })
-
+  data() {
     return {
-      username,
-      message,
-      messages,
-      sendMessage,
-    }
+      username: "",
+      message: "",
+      messages: [],
+      socket: null,
+    };
   },
-}
+  mounted() {
+    this.socket = new WebSocket("ws://localhost:8000/ws");
+    this.socket.addEventListener("message", (event) => {
+      const message = JSON.parse(event.data);
+      this.messages.push(message);
+    });
+    this.getMessages();
+  },
+  methods: {
+    async getMessages() {
+      const response = await this.$axios.$get("/api/messages");
+      this.messages = response;
+    },
+    async sendMessage() {
+      const message = {
+        username: this.username,
+        message: this.message,
+      };
+      this.socket.send(JSON.stringify(message));
+      this.message = "";
+    },
+  },
+};
 </script>
+
 <style scoped>
 * {
   box-sizing: border-box;
@@ -93,6 +83,8 @@ textarea {
 body {
   font-family: Arial, sans-serif;
   font-size: 16px;
+  background-color: #1d1d1d;
+  color: #fff;
 }
 
 .container {
@@ -108,12 +100,13 @@ body {
 
 .message {
   margin: 0.5rem 0;
-  background-color: #f5f5f5;
+  background-color: #292929;
   border-radius: 5px;
+  padding: 10px;
 }
 
 .message-header {
-  color: #005cbf;
+  color: #a35d41;
 }
 
 .message-username {
@@ -122,7 +115,7 @@ body {
 }
 
 .message-content {
-  color: black;
+  color: #fff;
   font-size: 16px;
 }
 
@@ -137,40 +130,41 @@ body {
   line-height: 1.5;
   border-radius: 0.25rem;
   color: #fff;
-  background-color: #007bff;
-  border-color: #007bff;
+  background-color: #a35d41;
+  border-color: #a35d41;
+  padding: 0.5rem 1rem;
 }
 
 .btn-primary:hover {
   color: #fff;
-  background-color: #0069d9;
-  border-color: #0062cc;
+  background-color: #7b4530;
+  border-color: #7b4530;
 }
 
 .btn-primary:focus,
 .btn-primary.focus {
-  box-shadow: 0 0 0 0.2rem rgba(38, 143, 255, 0.5);
+  box-shadow: 0 0 0 0.2rem rgba(163, 93, 65, 0.5);
 }
 
 .btn-primary.disabled,
 .btn-primary:disabled {
   color: #fff;
-  background-color: #007bff;
-  border-color: #007bff;
+  background-color: #a35d41;
+  border-color: #a35d41;
 }
 
 .btn-primary:not(:disabled):not(.disabled):active,
 .btn-primary:not(:disabled):not(.disabled).active,
-.show>.btn-primary.dropdown-toggle {
+.show > .btn-primary.dropdown-toggle {
   color: #fff;
-  background-color: #0062cc;
-  border-color: #005cbf;
+  background-color: #7b4530;
+  border-color: #7b4530;
 }
 
 .btn-primary:not(:disabled):not(.disabled):active:focus,
 .btn-primary:not(:disabled):not(.disabled).active:focus,
-.show>.btn-primary.dropdown-toggle:focus {
-  box-shadow: 0 0 0 0.2rem rgba(38, 143, 255, 0.5);
+.show > .btn-primary.dropdown-toggle:focus {
+  box-shadow: 0 0 0 0.2rem rgba(163, 93, 65, 0.5);
 }
 
 .form-control {
@@ -180,21 +174,19 @@ body {
   font-size: 1rem;
   font-weight: 400;
   line-height: 1.5;
-  color: #495057;
-  background-color: #fff;
+  color: #fff;
+  background-color: #363636;
   background-clip: padding-box;
-  border: 1px solid #ced4da;
+  border: 1px solid #555555;
   border-radius: 0.25rem;
-  transition: border-color 0.15s ease-in-out,
-    box-shadow 0.15s ease-in-out;
+  transition: border-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out;
 }
 
 .form-control:focus {
-  color: #495057;
-  background-color: #fff;
-  border-color: #80bdff;
+  color: #fff;
+  background-color: #363636;
+  border-color: #a35d41;
   outline: 0;
-  box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.25);
+  box-shadow: 0 0 0 0.2rem rgba(163, 93, 65, 0.25);
 }
 </style>
-
