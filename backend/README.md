@@ -29,3 +29,17 @@ poetry install
 poetry shell
 uvicorn backend.main:app --reload
 ```
+
+## Stop the server
+
+### Docker compose
+
+```bash
+docker-compose down
+```
+
+### Poetry
+
+```bash
+Ctrl + C
+```
