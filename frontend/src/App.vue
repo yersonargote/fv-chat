@@ -1,22 +1,23 @@
+<!-- App.vue -->
 <template>
   <div class="container">
     <h1>Real-Time Chat</h1>
     <form class="form-inline" @submit.prevent="sendMessage">
       <div class="form-group">
         <label for="username">Username:</label>
-        <input v-model="username" id="username" type="text" class="form-control" placeholder="Your username" />
+        <input v-model="username" id="username" type="text" class="form-control" placeholder="Your username">
       </div>
       <div class="form-group mx-sm-3">
         <label for="message">Message:</label>
-        <input v-model="message" id="message" type="text" class="form-control" placeholder="Your message" />
+        <input v-model="message" id="message" type="text" class="form-control" placeholder="Your message">
       </div>
       <button type="submit" class="btn btn-primary">Send</button>
     </form>
     <div class="card">
       <div class="card-body messages">
-        <div v-for="message in messages" :key="message.message.id" class="message">
+        <div v-for="message in messages" :key="message.id" class="message">
           <div class="message-header">
-            <h2 class="message-username">{{ message.message.username }}</h2>
+            <h2 class="message-username">{{ message.message.username}}</h2>
           </div>
           <div class="message-body">
             <p class="message-content">{{ message.message.message }}</p>
@@ -27,38 +28,51 @@
   </div>
 </template>
 
-<script setup lang="ts">
-import { ref, onMounted } from 'vue';
+<script lang="ts">
+import { ref, onMounted } from 'vue'
+import axios from 'axios'
 
-const username = ref('');
-const message = ref('');
-const messages = ref([]);
-let socket = null;
+export default {
+  setup() {
+    const username = ref('')
+    const message = ref('')
+    const messages = ref([])
+    let socket: WebSocket | null = null
 
-const getMessages = async () => {
-  const response = await fetch('/api/messages');
-  messages.value = await response.json();
-};
+    const getMessages = async () => {
+      const response = await axios.get('/api/messages')
+      messages.value = response.data
+    }
 
-const sendMessage = async () => {
-  const messageData = {
-    username: username.value,
-    message: message.value,
-  };
-  socket.send(JSON.stringify(messageData));
-  message.value = '';
-};
+    const sendMessage = async () => {
+      if (socket) {
+        const messageObj = {
+          username: username.value,
+          message: message.value,
+        }
+        socket.send(JSON.stringify(messageObj))
+        message.value = ''
+      }
+    }
 
-onMounted(() => {
-  socket = new WebSocket('ws://localhost:8000/ws');
-  socket.addEventListener('message', (event) => {
-    const messageData = JSON.parse(event.data);
-    messages.value.push(messageData);
-  });
-  getMessages();
-});
+    onMounted(() => {
+      socket = new WebSocket('ws://localhost:8000/ws')
+      socket.addEventListener('message', (event) => {
+        const message = JSON.parse(event.data)
+        messages.value.push(message)
+      })
+      getMessages()
+    })
+
+    return {
+      username,
+      message,
+      messages,
+      sendMessage,
+    }
+  },
+}
 </script>
-
 <style scoped>
 * {
   box-sizing: border-box;
@@ -183,3 +197,4 @@ body {
   box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.25);
 }
 </style>
+
