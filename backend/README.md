@@ -27,5 +27,5 @@ docker-compose up -d
 ```bash
 poetry install
 poetry shell
-uvicorn main:app --reload
+uvicorn backend.main:app --reload
 ```
